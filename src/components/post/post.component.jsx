@@ -2,15 +2,30 @@ import React from 'react';
 import axios from "axios";
 
 export class Post extends React.Component {
-    constructor( ) {
+    constructor( props ) {
         console.log( 'Post.constructor()' );
 
         super();
 
-        this.state = {
-            isLoading: false,
-            title: '',
-            description: '',
+        // component state
+        if ( props.staticContext ) {
+            this.state = {
+                isLoading: false,
+                title: props.staticContext.title,
+                description: props.staticContext.body
+            }
+        } else if( window.initial_state ) {
+            this.state = {
+                isLoading: false,
+                title: window.initial_state.title,
+                description: window.initial_state.body,
+            };
+        } else {
+            this.state = {
+                isLoading: true,
+                title: '',
+                description: '',
+            };
         }
     }
 
@@ -27,23 +42,21 @@ export class Post extends React.Component {
 
     // when component mounts, fetch data
     componentDidMount() {
-        console.log( 'Post.componentDidMount()' );
+        if ( this.state.isLoading) {
+            console.log( 'Post.componentDidMount()' );
 
-        this.setState({
-            isLoading: true
-        })
-
-        Post.fetchData().then(data => {
-            this.setState({
-                isLoading: false,
-                title: data.title,
-                description: data.body,
+            Post.fetchData().then(data => {
+                this.setState({
+                    isLoading: false,
+                    title: data.title,
+                    description: data.body,
+                })
+            }).finally(() => {
+                this.setState({
+                    isLoading: false
+                })
             })
-        }).finally(() => {
-            this.setState({
-                isLoading: false
-            })
-        })
+        }
     }
 
     render() {
